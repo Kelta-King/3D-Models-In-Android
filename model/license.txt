@@ -1,0 +1,11 @@
+Model Information:
+* title:	Yamaha Vino with annotation
+* source:	https://sketchfab.com/3d-models/yamaha-vino-with-annotation-6bdb9d3c50aa421686a2d337dc56d8ca
+* author:	sheikhirfan_ (https://sketchfab.com/sheikhirfan_)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Yamaha Vino with annotation" (https://sketchfab.com/3d-models/yamaha-vino-with-annotation-6bdb9d3c50aa421686a2d337dc56d8ca) by sheikhirfan_ (https://sketchfab.com/sheikhirfan_) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

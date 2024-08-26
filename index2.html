@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Babylon.js 3D Model Annotation</title>
+    <style>
+        html, body { width: 100%; height: 100%; overflow: hidden; margin: 0; }
+        #renderCanvas { width: 100%; height: 100%; touch-action: none; }
+        #canvasZone { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+    </style>
+</head>
+<body>
+    <div id="canvasZone"></div>
+    <canvas id="renderCanvas"></canvas>
+
+    <!-- Include Babylon.js -->
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylon.glTF2FileLoader.js"></script>
+
+    <script>
+        var canvas = document.getElementById("renderCanvas");
+        var engine = new BABYLON.Engine(canvas, true);
+
+        function createLabel(str) {
+            let lbl = document.createElement('div');
+            lbl.style.userSelect = "none";
+            lbl.style.position = "absolute";
+            lbl.style.backgroundColor = "red";
+            lbl.style.resize = "both";
+            lbl.style.padding = "5px 30px 5px 30px";
+            lbl.style.maxWidth = "180px";
+            lbl.style.width = "180px";
+            lbl.style.height = 'auto';
+            lbl.style.textAlign = "center";
+            let p = document.createElement('p');
+            lbl.appendChild(p);
+            p.textContent = str;
+            document.getElementById('canvasZone').appendChild(lbl);
+            return lbl;
+        }
+
+        var createScene = function () {
+            var scene = new BABYLON.Scene(engine);
+
+            var canvasZone = document.getElementById('canvasZone');
+
+            // Adding a light
+            var light = new BABYLON.HemisphericLight("Hemi", new BABYLON.Vector3(0, 1, 0), scene);
+
+            // Adding an Arc Rotate Camera
+            var camera = new BABYLON.ArcRotateCamera("Camera", -1.85, 1.2, 200, BABYLON.Vector3.Zero(), scene);
+            camera.attachControl(canvas, true);
+
+            var all_labels = [];
+            var sprites = [];
+
+            BABYLON.SceneLoader.ImportMesh("Shcroendiger'scat", "https://playground.babylonjs.com/scenes/", "SSAOcat.babylon", scene, function (newMeshes) {
+                var cat = newMeshes[0];
+
+                // Set the target of the camera to the first imported mesh
+                camera.target = cat;
+
+                var onPointerDown = function (evt) {
+                    if (evt.button !== 0) {
+                        return;
+                    }
+
+                    var pickInfo = scene.pick(scene.pointerX, scene.pointerY, function (mesh) { return mesh === cat; });
+                    if (pickInfo.hit) {
+                        let sprite = { pos: pickInfo.pickedPoint, elem: document.createElement('div'), color: '#00ff00', width: 80, height: 80 };
+                        sprite.pos.addInPlace(pickInfo.getNormal());
+
+                        sprite.elem.style.position = 'absolute';
+                        sprite.elem.style.width = sprite.width + 'px';
+                        sprite.elem.style.height = sprite.height + 'px';
+                        sprite.elem.style.backgroundColor = sprite.color;
+                        sprites.push(sprite);
+                        canvasZone.appendChild(sprite.elem);
+
+                        let label = createLabel("label " + (all_labels.length + 1));
+                        all_labels.push({
+                            div: label,
+                            pos: pickInfo.pickedPoint,
+                            width: label.offsetWidth,
+                            height: label.offsetHeight
+                        });
+                    }
+                };
+
+                canvas.addEventListener("pointerdown", onPointerDown, false);
+
+                scene.onAfterRenderObservable.add(() => {
+                    sprites.forEach((sprite) => {
+                        var posInViewProj = BABYLON.Vector3.Project(sprite.pos, BABYLON.Matrix.Identity(), scene.getTransformMatrix(), scene.getEngine().getRenderWidth(), scene.getEngine().getRenderHeight());
+                        var screenCoords = new BABYLON.Vector2(posInViewProj.x, posInViewProj.y);
+                        var px = screenCoords.x - sprite.width / 2;
+                        var py = screenCoords.y - sprite.height / 2;
+
+                        sprite.elem.style.left = (px + canvasZone.offsetLeft) + 'px';
+                        sprite.elem.style.top = (py + canvasZone.offsetTop) + 'px';
+                    });
+                });
+
+                scene.onDispose = function () {
+                    canvas.removeEventListener("pointerdown", onPointerDown);
+                    all_labels.forEach((ob) => { ob.div.remove(); });
+                    sprites.forEach((ob) => { ob.elem.remove(); });
+                    all_labels = null;
+                };
+            });
+
+            return scene;
+        };
+
+        var scene = createScene();
+        engine.runRenderLoop(function () {
+            scene.render();
+        });
+
+        window.addEventListener("resize", function () {
+            engine.resize();
+        });
+    </script>
+</body>
+</html>
