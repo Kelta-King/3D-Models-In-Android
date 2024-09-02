@@ -100,18 +100,47 @@ function createTextBox(position) {
     labels.push({ element: div, position: position });
 }
 
+// function updateLabels() {
+//     labels.forEach(label => {
+//         const vector = new THREE.Vector3(label.position.x, label.position.y, label.position.z);
+//         vector.project(camera);
+
+//         const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+//         const y = -(vector.y * 0.5 - 0.5) * window.innerHeight;
+
+//         label.element.style.left = `${x}px`;
+//         label.element.style.top = `${y}px`;
+//     });
+// }
+
 function updateLabels() {
     labels.forEach(label => {
         const vector = new THREE.Vector3(label.position.x, label.position.y, label.position.z);
-        vector.project(camera);
 
-        const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
-        const y = -(vector.y * 0.5 - 0.5) * window.innerHeight;
+        // Calculate the distance between the camera and the label position
+        const distance = camera.position.distanceTo(vector);
 
-        label.element.style.left = `${x}px`;
-        label.element.style.top = `${y}px`;
+        // Set a threshold distance (e.g., 70 units) to hide or show the label
+        const thresholdDistance = 170;
+
+        if (distance > thresholdDistance) {
+            console.log("Hide");
+            label.element.style.display = 'none'; // Hide the label
+        } else {
+            // Project the 3D position to 2D screen coordinates
+            vector.project(camera);
+
+            const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+            const y = -(vector.y * 0.5 - 0.5) * window.innerHeight;
+
+            label.element.style.display = 'block'; // Show the label
+            label.element.style.left = `${x}px`;
+            label.element.style.top = `${y}px`;
+        }
     });
 }
+
+
 
 function animate() {
     controls.update(); // Update controls on every frame
