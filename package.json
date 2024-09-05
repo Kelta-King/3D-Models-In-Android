@@ -9,6 +9,6 @@
     "vite": "^5.4.2"
   },
   "scripts": {
-    "start": "http-server -c-1 ."
+    "start": "http-server -c-1 --cors ."
   }
 }
